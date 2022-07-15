@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-public enum TicTacToeState { none, cross, circle }
+public enum TicTacToeState { none, cross, circle, tie }
 
 [System.Serializable]
 public class WinnerEvent : UnityEvent<int>
@@ -103,7 +103,6 @@ public class TicTacToeAI : MonoBehaviour
         if (!Winner.Equals(TicTacToeState.none))
         {
             onPlayerWin = null;
-            this.Awake();
         }
     }
 }

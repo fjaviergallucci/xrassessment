@@ -42,6 +42,10 @@
         if (!Winner.Equals(TicTacToeState.none))
             return Winner;
 
+        /* If max movements and no winners, then is a tie */
+        if (this.movements >= 9)
+            return TicTacToeState.tie;
+
         return TicTacToeState.none;
     }
 
