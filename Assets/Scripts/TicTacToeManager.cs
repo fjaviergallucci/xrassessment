@@ -1,18 +1,21 @@
-﻿using TicTacToe;
-using TMPro;
+﻿using System;
+using TicTacToe;
 using UnityEngine;
 using UnityEngine.Events;
+using System.Collections;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 [System.Serializable]
-public class WinnerEvent : UnityEvent<string>
+public class WinnerEvent : UnityEvent<TicTacToeState>
 {
 }
 
 public class TicTacToeManager : MonoBehaviour
 {
-    TicTacToeService _ticTacToeService;
-    int _aiLevel;
+    private TicTacToeService _ticTacToeService;
+    public int aiLevel;
+    public bool isPlayerTurn;
 
     [SerializeField] private TicTacToeState currentPlayerState;
 
@@ -30,24 +33,23 @@ public class TicTacToeManager : MonoBehaviour
     [SerializeField] private GameObject _oPrefab;
 
     public UnityEvent onGameStarted;
+
     public UnityEvent onPlayerChanged;
+
     //Call This event with the player number to denote the winner
     public WinnerEvent onPlayerWin;
-    
+
     [SerializeField] private GameObject startingPanel;
     [SerializeField] private GameObject gamePanel;
 
     public void StartAI(int aiLevel)
     {
-        _aiLevel = aiLevel;
+        this.aiLevel = aiLevel;
         StartGame();
     }
 
     private void StartGame()
     {
-        _ticTacToeService = new TicTacToeService();
-        _tileClickTriggers = new TileClickTrigger[3, 3];
-
         SelectRandomPlayer();
         onPlayerChanged.AddListener(ChangePlayer);
 
@@ -56,6 +58,8 @@ public class TicTacToeManager : MonoBehaviour
 
     private void Awake()
     {
+        _ticTacToeService = new TicTacToeService();
+        _tileClickTriggers = new TileClickTrigger[3, 3];
         if (onPlayerWin == null)
         {
             onPlayerWin = new WinnerEvent();
@@ -71,7 +75,10 @@ public class TicTacToeManager : MonoBehaviour
     {
         SetVisual(coordX, coordY);
         _ticTacToeService.TileSelected(coordX, coordY, currentPlayerState);
-        CheckGameOver();
+        
+        /* If Game finished */
+        if (IsGameOver()) return true;
+        
         onPlayerChanged.Invoke();
         return true;
     }
@@ -85,20 +92,32 @@ public class TicTacToeManager : MonoBehaviour
         );
     }
 
-    private void CheckGameOver()
+    private bool IsGameOver()
     {
+        /*ToDo: Refactor */ 
         TicTacToeState winner = _ticTacToeService.GameOver();
-        if (!winner.Equals(TicTacToeState.none))
-        {
-            onPlayerWin.Invoke(currentPlayerState == TicTacToeState.circle ? "Circle" : "Cross");
-        }
+        if (winner.Equals(TicTacToeState.none)) return false;
+
+        onPlayerWin.Invoke(winner);
+        return true;
     }
 
     private void ChangePlayer()
     {
+        /*ToDo: Refactor with random player method */
+        //By default player is always active
+        isPlayerTurn = true;
+        var recentPlayer = currentPlayerState;
         currentPlayerState =
             (currentPlayerState == TicTacToeState.circle ? TicTacToeState.cross : TicTacToeState.circle);
         SetCurrentPlayerVisual();
+
+        /* If AI Turn */
+        if (PlayerState.Equals(recentPlayer))
+        {
+            isPlayerTurn = false;
+            StartCoroutine(WaitAIToMove());
+        }
     }
 
     private void SetCurrentPlayerVisual()
@@ -114,7 +133,56 @@ public class TicTacToeManager : MonoBehaviour
 
     private void SelectRandomPlayer()
     {
+        //By default player is always active
+        isPlayerTurn = true;
         currentPlayerState = Random.value < 0.5f ? PlayerState : AIState;
         SetCurrentPlayerVisual();
+
+        /* If AI Turn */
+        if (AIState.Equals(currentPlayerState))
+        {
+            isPlayerTurn = false;
+            StartCoroutine(WaitAIToMove());
+        }
+    }
+
+    IEnumerator WaitAIToMove()
+    {
+        yield return new WaitForSeconds(2);
+        AiMove();
+    }
+
+    private void AiMove()
+    {
+        /*ToDo: Implement difficulty level */
+        (int, int) coords;
+        switch (aiLevel)
+        {
+            case 1:
+                coords = RandomMove();
+                break;
+
+            case 2:
+                coords = RandomMove();
+                break;
+
+            default:
+                coords = RandomMove();
+                break;
+        }
+
+        _tileClickTriggers[coords.Item1, coords.Item2].TileSelected();
+    }
+
+    private (int, int) RandomMove()
+    {
+        int coordX, coordY;
+        do
+        {
+            coordX = Random.Range(0, 3);
+            coordY = Random.Range(0, 3);
+        } while (_ticTacToeService.IsSelected(coordX, coordY));
+
+        return (coordX, coordY);
     }
 }

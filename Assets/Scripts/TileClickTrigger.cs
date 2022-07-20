@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TicTacToe;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 public class TileClickTrigger : MonoBehaviour
@@ -13,6 +14,8 @@ public class TileClickTrigger : MonoBehaviour
 
     [SerializeField] private bool canClick;
 
+    public UnityEvent _selectTile;
+
     private void Awake()
     {
         _gameManager = FindObjectOfType<TicTacToeManager>();
@@ -23,6 +26,7 @@ public class TileClickTrigger : MonoBehaviour
         _gameManager.onGameStarted.AddListener(AddReference);
         _gameManager.onGameStarted.AddListener(() => SetInputEndabled(true));
         _gameManager.onPlayerWin.AddListener((win) => SetInputEndabled(false));
+        _selectTile.AddListener(OnMouseDown);
     }
 
     private void SetInputEndabled(bool val)
@@ -38,8 +42,13 @@ public class TileClickTrigger : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (!canClick) return;
-        
+        /*If tile selected or is not player turn, return*/
+        if (!canClick || !_gameManager.isPlayerTurn) return;
+        TileSelected();
+    }
+
+    public void TileSelected()
+    {
         if (_gameManager.TrySelect(myCoordX, myCoordY))
         {
             this.canClick = false;

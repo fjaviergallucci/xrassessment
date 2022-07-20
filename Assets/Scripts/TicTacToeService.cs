@@ -27,10 +27,10 @@ namespace TicTacToe
             this._movements++;
         }
 
-        // private bool IsSelected(int coordX, int coordY)
-        // {
-        //     return !this._board[coordX, coordY].Equals(TicTacToeState.none);
-        // }
+        public bool IsSelected(int coordX, int coordY)
+        {
+            return !this._board[coordX, coordY].Equals(TicTacToeState.none);
+        }
 
         public TicTacToeState GameOver()
         {
@@ -101,13 +101,4 @@ namespace TicTacToe
         }
     }
 
-    /**
-     * selecciona una casilla
-     * verifica horizontal, vertical diagonal
-     * Horizontal: x-1 y x+1 hasta que x = 0 y x=2
-     * vertical: y-1 y y+1 hasta que y = 0 y y=2
-     * diagonal: x+1&&y+1 hasta x y y igual 2... x-1&&y-1 hasta x y y igual 0... 
-     * 
-     * 
-     */
 }
