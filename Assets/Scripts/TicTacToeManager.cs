@@ -170,7 +170,6 @@ public class TicTacToeManager : MonoBehaviour
                 coords = RandomMove();
                 break;
         }
-
         _tileClickTriggers[coords.Item1, coords.Item2].TileSelected();
     }
 
