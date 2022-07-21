@@ -50,6 +50,8 @@ public class TicTacToeManager : MonoBehaviour
 
     private void StartGame()
     {
+        _ticTacToeService = new TicTacToeService();
+        _tileClickTriggers = new TileClickTrigger[3, 3];
         SelectRandomPlayer();
         onPlayerChanged.AddListener(ChangePlayer);
 
@@ -58,8 +60,6 @@ public class TicTacToeManager : MonoBehaviour
 
     private void Awake()
     {
-        _ticTacToeService = new TicTacToeService();
-        _tileClickTriggers = new TileClickTrigger[3, 3];
         if (onPlayerWin == null)
         {
             onPlayerWin = new WinnerEvent();
